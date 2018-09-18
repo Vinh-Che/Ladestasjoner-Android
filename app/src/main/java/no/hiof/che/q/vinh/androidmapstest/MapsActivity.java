@@ -69,7 +69,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             JSONArray arr = object.getJSONArray("chargerstations");
             ArrayList<HashMap<String, String>> formList = new ArrayList<HashMap<String, String>>();
             HashMap<String, String> hMap;
-
+            // -2800 er for å ikke kræsje appen ved at det leses inn for mye data
             for (int i = 0; i < arr.length()-2800; i++) {
                 JSONObject csmd = arr.getJSONObject(i).getJSONObject("csmd");
 
