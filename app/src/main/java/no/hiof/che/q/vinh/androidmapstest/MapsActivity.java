@@ -42,7 +42,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         writeJSON();
     }
-    /*
+    // Funker ikke
     void createMarkersFromJson(String json) throws JSONException {
         // De-serialize the JSON string into an array of city objects
         JSONArray jsonArray = new JSONArray(json);
@@ -60,7 +60,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             );
         }
     }
-    */
+
 
     public void writeJSON() {
         try {
