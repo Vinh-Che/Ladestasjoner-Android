@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -36,55 +37,78 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        writeJSON();
+        createMarkersFromJson();
+        //writeJSON();
     }
     // Funker ikke
-    void createMarkersFromJson(String json) throws JSONException {
-        // De-serialize the JSON string into an array of city objects
-        JSONArray jsonArray = new JSONArray(json);
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-            // Create a marker for each city in the JSON data.
-            JSONObject jsonObj = jsonArray.getJSONObject(i);
-            mMap.addMarker(new MarkerOptions()
-                    .title(jsonObj.getString("name"))
-                    .snippet(Integer.toString(jsonObj.getInt("population")))
-                    .position(new LatLng(
-                            jsonObj.getJSONArray("latlng").getDouble(0),
-                            jsonObj.getJSONArray("latlng").getDouble(1)
-                    ))
-            );
-        }
-    }
-
-
+    // Test klasse, bare for å printe ut ting i logcat
     public void writeJSON() {
         try {
             JSONObject object = null;
             object = new JSONObject(loadJSONFromAsset());
-            JSONArray arr = object.getJSONArray("chargerstations");
+            JSONArray jsonObj = object.getJSONArray("chargerstations");
+
             ArrayList<HashMap<String, String>> formList = new ArrayList<HashMap<String, String>>();
             HashMap<String, String> hMap;
+
             // -2800 er for å ikke kræsje appen ved at det leses inn for mye data
-            for (int i = 0; i < arr.length()-2800; i++) {
-                JSONObject csmd = arr.getJSONObject(i).getJSONObject("csmd");
+            for (int i = 0; i < jsonObj.length()-2800; i++) {
+                JSONObject csmd = jsonObj.getJSONObject(i).getJSONObject("csmd");
 
                 String navn = csmd.getString("name");
                 String by = csmd.getString("City");
 
-                Log.d("DETAILS", csmd.getString("name"));
+                // Splitter opp Stringen slik at vi får lat og long stående for seg selv.
+                String[] index = csmd.getString("Position").replaceAll("\\(", "").replaceAll("\\)","").split(",");
+                Double latitude = Double.parseDouble(index[0]);
+                Double longitude = Double.parseDouble(index[1]);
 
+                // Tester
+                //Log.d("DETAILS", csmd.getString("name"));
+                //Log.d("DETAILS", csmd.getString("Position"));
+                Log.d("DETAILS", "Lat: " + index[0] +
+                                            " Lon: " + index[1]);
 
                 //Add your values in your `ArrayList` as below:
-                hMap = new HashMap<String, String>();
+                /*hMap = new HashMap<String, String>();
                 hMap.put("formule", navn);
                 hMap.put("url", by);
 
-                formList.add(hMap);
+                formList.add(hMap);*/
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createMarkersFromJson() {
+        try {
+            JSONObject object = null;
+            object = new JSONObject(loadJSONFromAsset());
+            JSONArray jsonObj = object.getJSONArray("chargerstations");
+
+            // -2800 er for å ikke kræsje appen ved at det leses inn for mye data
+            for (int i = 0; i < jsonObj.length(); i++) {
+                JSONObject csmd = jsonObj.getJSONObject(i).getJSONObject("csmd");
+
+                // Splitter opp Stringen slik at vi får lat og long stående for seg selv.
+                String[] index = csmd.getString("Position").replaceAll("\\(", "").replaceAll("\\)","").split(",");
+                Double latitude = Double.parseDouble(index[0]);
+                Double longitude = Double.parseDouble(index[1]);
+
+
+                LatLng markerJson = new LatLng(latitude, longitude);
+                mMap.addMarker(new MarkerOptions().position(markerJson)
+                                                  .title(csmd.getString("name")));
+                //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+
+                // Tester
+                //Log.d("DETAILS", csmd.getString("name"));
+                //Log.d("DETAILS", csmd.getString("Position"));
+                Log.d("DETAILS", "Lat: " + index[0] +
+                        " Lon: " + index[1]);
             }
         } catch (JSONException e) {
             e.printStackTrace();
