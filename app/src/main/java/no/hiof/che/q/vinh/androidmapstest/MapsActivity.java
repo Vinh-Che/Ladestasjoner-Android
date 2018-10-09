@@ -2,17 +2,27 @@ package no.hiof.che.q.vinh.androidmapstest;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.ActionMenuItemView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+import android.support.v7.widget.SearchView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,22 +30,52 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final int MY_PERMISSIONS_REQUEST_CURRENT_LOCATION = 100;
     // Vars
     private GoogleMap mMap;
-    public static Location mLocation;
+    private View mapView;
+    private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+
+
+        return true;
+    }
 
 
     @Override
@@ -44,8 +84,77 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        sendPost();
+
     }
+
+    /*
+    private void updateUI(FirebaseUser user) {
+        hideProgressDialog();
+        if (user != null) {
+            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
+            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
+
+            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+        } else {
+            mStatusTextView.setText(R.string.signed_out);
+            mDetailTextView.setText(null);
+
+            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
+        }
+    }
+    */
+
+
+
+    public void sendPost() {
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    URL url = new URL("https://nobil.no/api/server/search.php");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                    conn.setRequestProperty("Accept","application/json");
+                    conn.setDoOutput(true);
+                    conn.setDoInput(true);
+
+                    JSONObject jsonParam = new JSONObject();
+                    jsonParam.getJSONObject("Chargerstations").getJSONObject("csmd").getJSONObject("name");
+
+                    Log.i("JSON", jsonParam.toString());
+                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                    //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
+                    os.writeBytes(jsonParam.toString());
+
+                    os.flush();
+                    os.close();
+
+                    Log.i("STATUS", String.valueOf(conn.getResponseCode()));
+                    Log.i("MSG" , conn.getResponseMessage());
+
+                    conn.disconnect();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+    }
+
 
     public void getPermission(GoogleMap map) {
         mMap = map;
@@ -128,54 +237,66 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         createMarkersFromJson();
         getPermission(mMap);
 
+        getData();
+
+        if (mapView != null &&
+                mapView.findViewById(Integer.parseInt("1")) != null) {
+            // Get the button view
+            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            // and next place it, on bottom right (as Google Maps app)
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            // position on right bottom
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, 30, 150);
+        }
+
+
     }
 
     public void locationPlaceholder() {
 
     }
 
+    public void getData() {
+
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("chargerstations");
+
+
+        ValueEventListener chargeListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    // Sorterer på sarpsborg
+                    if (ds.child("csmd").child("Municipality").getValue().equals("SARPSBORG")) {
+                        //System.out.println("FOR 2: " + ds.child("csmd").child("position").getValue()); }
+                        //String[] index = ds.child("csmd").child("position").getValue().toString();
+                        String[] index = ds.child("csmd").child("Position").getValue().toString().replaceAll("\\(", "").replaceAll("\\)", "").split(",");
+
+                        Double latitude = Double.parseDouble(index[0]);
+                        Double longitude = Double.parseDouble(index[1]);
+
+                        LatLng markerJson = new LatLng(latitude, longitude);
+                        mMap.addMarker(new MarkerOptions().position(markerJson)
+                                .title(ds.child("csmd").child("name").getValue().toString()));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Post failed, log a message
+                Log.w("firebase", "loadPost:onCancelled", databaseError.toException());
+                // ...
+            }
+        };
+        mDatabase.addValueEventListener(chargeListener);
+    }
+
     // Test klasse, bare for å printe ut ting i logcat
     public void writeJSON() {
-        try {
-            JSONObject object = null;
-            object = new JSONObject(loadJSONFromAsset());
-            JSONArray jsonObj = object.getJSONArray("chargerstations");
 
-            ArrayList<HashMap<String, String>> stasjonerListe = new ArrayList<HashMap<String, String>>();
-            HashMap<String, String> hMap;
-
-
-            for (int i = 0; i < jsonObj.length(); i++) {
-                JSONObject csmd = jsonObj.getJSONObject(i).getJSONObject("csmd");
-
-                String navn = csmd.getString("name");
-                String by = csmd.getString("City");
-
-                // Splitter opp Stringen slik at vi får lat og long stående for seg selv.
-                String[] index = csmd.getString("Position").replaceAll("\\(", "").replaceAll("\\)","").split(",");
-                Double latitude = Double.parseDouble(index[0]);
-                Double longitude = Double.parseDouble(index[1]);
-
-                // Tester
-                if(csmd.getString("Municipality") == "GJERSTAD") {
-                    Log.d("DETAILS", csmd.getString("name"));
-                }
-                //Log.d("DETAILS", csmd.getString("Position"));
-                //Log.d("DETAILS", "Lat: " + index[0] +
-                //                            " Lon: " + index[1]);
-
-                //Add your values in your `ArrayList` as below:
-
-                hMap = new HashMap<String, String>();
-                hMap.put("navn", navn);
-                hMap.put("by", by);
-
-                stasjonerListe.add(hMap);
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     public void createMarkersFromJson() {
@@ -183,6 +304,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             JSONObject object = null;
             object = new JSONObject(loadJSONFromAsset());
             JSONArray jsonObj = object.getJSONArray("chargerstations");
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
 
                 for (int i = 0; i < jsonObj.length(); i++) {
@@ -228,4 +350,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return json;
     }
+
+
+
 }
