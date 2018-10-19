@@ -34,6 +34,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.ClusterRenderer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,6 +44,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -51,6 +55,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DatabaseReference mDatabase;
     private static FirebaseDatabase firebaseDatabase;
     private Marker marker;
+    private ClusterManager<MyItem> mClusterManager;
 
 
     @Override
@@ -156,6 +161,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+
+
     @Override
     public void onMapReady(GoogleMap Map) {
         mMap = Map;
@@ -170,8 +177,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             firebaseDatabase = FirebaseDatabase.getInstance();
             firebaseDatabase.setPersistenceEnabled(true);
         }
+
+        // Cluster
+        if (mClusterManager == null) {
+            mClusterManager = new ClusterManager<MyItem>(this, mMap);
+        }
+
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnInfoWindowClickListener(mClusterManager.getMarkerManager());
+
+
+
+
         // Laster inn data fra database
         getData();
+
 
         if (mapView != null && mapView.findViewById(Integer.parseInt("1")) != null) {
 
@@ -192,9 +213,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("chargerstations");
 
-        ValueEventListener chargeListener = (new ValueEventListener() {
+        ValueEventListener chargeListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                mClusterManager.clearItems();
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     // Eksempel på sortereing på f.eks. sarpsborg
                     //if (ds.child("csmd").child("Municipality").getValue().equals("SARPSBORG")) {
@@ -208,12 +230,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .position(markerJson)
                                 .title(ds.child("csmd").child("name").getValue().toString()));
                         marker.setTag(ds);
+                        Log.d("latlong", "Lat: " + latitude + "\n" + "Lng: " + longitude);
+                        mClusterManager.addItem(new MyItem(latitude, longitude));
+                        mMap.clear();
+
 
 
                     //}
 
-                    //http://nobil.no/img/ladestasjonbilder/55.jpg
-                    //imageURL = ds.child("csmd").child("Image").getValue().toString();
+                    // Cluster
+                    mClusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<MyItem>() {
+                        @Override
+                        public boolean onClusterClick(Cluster<MyItem> cluster) {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(cluster.getPosition()));
+                            mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
+                            return true;
+                        }
+                    });
 
                     // Infowindow
                     mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -226,7 +259,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     });
                 }
+                mClusterManager.cluster();
             }
+
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -234,10 +270,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.w("firebasefail", "loadPost:onCancelled", databaseError.toException());
                 // ...
             }
-        });
+        };
         mDatabase.addValueEventListener(chargeListener);
         mDatabase.keepSynced(true);
     }
+
 
 
     // Sjekker om det er tilkobling mot firebase
@@ -317,6 +354,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return json;
     }
+
+
 
 
 
