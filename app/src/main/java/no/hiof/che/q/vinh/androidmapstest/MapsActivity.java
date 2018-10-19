@@ -2,19 +2,16 @@ package no.hiof.che.q.vinh.androidmapstest;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.ActionMenuItemView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -29,12 +26,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,24 +39,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private static final int MY_PERMISSIONS_REQUEST_CURRENT_LOCATION = 100;
     // Vars
+    private static final int MY_PERMISSIONS_REQUEST_CURRENT_LOCATION = 100;
     private GoogleMap mMap;
     private View mapView;
     private DatabaseReference mDatabase;
-    private FirebaseAuth mAuth;
-
+    private static FirebaseDatabase firebaseDatabase;
+    private Marker marker;
 
 
     @Override
@@ -72,8 +60,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setMaxWidth(Integer.MAX_VALUE);
-
-
         return true;
     }
 
@@ -87,72 +73,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
 
-        mAuth = FirebaseAuth.getInstance();
+        /*
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            doMySearch(query);
+        }
+        */
 
+        // Toolbar
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-        sendPost();
 
     }
 
-    /*
-    private void updateUI(FirebaseUser user) {
-        hideProgressDialog();
-        if (user != null) {
-            mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-        } else {
-            mStatusTextView.setText(R.string.signed_out);
-            mDetailTextView.setText(null);
-
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
-        }
-    }
-    */
-
-
-
-    public void sendPost() {
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-
-                    URL url = new URL("https://nobil.no/api/server/search.php");
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-                    conn.setRequestProperty("Accept","application/json");
-                    conn.setDoOutput(true);
-                    conn.setDoInput(true);
-
-                    JSONObject jsonParam = new JSONObject();
-                    jsonParam.getJSONObject("Chargerstations").getJSONObject("csmd").getJSONObject("name");
-
-                    Log.i("JSON", jsonParam.toString());
-                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                    //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
-                    os.writeBytes(jsonParam.toString());
-
-                    os.flush();
-                    os.close();
-
-                    Log.i("STATUS", String.valueOf(conn.getResponseCode()));
-                    Log.i("MSG" , conn.getResponseMessage());
-
-                    conn.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        thread.start();
+    private void doMySearch(String query) {
     }
 
 
@@ -161,26 +96,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Gi permission pls", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ingen tilgang, vennligst gi tilgang for å benytte tjenesten", Toast.LENGTH_SHORT).show();
 
             // Permission is not granted
             // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                Toast.makeText(this, "hmm?", Toast.LENGTH_SHORT).show();
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                Toast.makeText(this, "Need permission", Toast.LENGTH_SHORT).show();
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
             } else {
-                // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_CURRENT_LOCATION);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
+
         } else {
             mMap.setMyLocationEnabled(true);
 
@@ -191,18 +121,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             location = locationManager.getLastKnownLocation(provider);
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-
-            // Funker hvis det ligger en location fra før, hvis den er null kræsjer appen/funker ikke knappen
-            // Midlertidig løsning
+            // Gjeldende location
             if (location != null) {
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
                 LatLng latLng = new LatLng(lat, lng);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
-            }
-            else {
-                locationPlaceholder();
             }
         }
     }
@@ -232,79 +157,118 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        createMarkersFromJson();
+    public void onMapReady(GoogleMap Map) {
+        mMap = Map;
+        //Placeholder: I tilfelle hvis brukeren ikke har last location known
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.913868, 10.752245), 7));
+
+        //Sjekker først om brukeren har gitt appen tillatelse for GPS
         getPermission(mMap);
 
+        //Offline db
+        if (firebaseDatabase == null) {
+            firebaseDatabase = FirebaseDatabase.getInstance();
+            firebaseDatabase.setPersistenceEnabled(true);
+        }
+        // Laster inn data fra database
         getData();
 
-        if (mapView != null &&
-                mapView.findViewById(Integer.parseInt("1")) != null) {
-            // Get the button view
+        if (mapView != null && mapView.findViewById(Integer.parseInt("1")) != null) {
+
+            // Button View
             View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-            // and next place it, on bottom right (as Google Maps app)
+            // Nederst til høyre (som Google Maps app)
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
                     locationButton.getLayoutParams();
-            // position on right bottom
+            // Position på knappene
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
             layoutParams.setMargins(0, 0, 30, 150);
+
         }
-
-
     }
 
-    public void locationPlaceholder() {
-
-    }
-
-    public void getData() {
+    private void getData() {
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("chargerstations");
 
-
-        ValueEventListener chargeListener = new ValueEventListener() {
+        ValueEventListener chargeListener = (new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    // Sorterer på sarpsborg
-                    if (ds.child("csmd").child("Municipality").getValue().equals("SARPSBORG")) {
-                        //System.out.println("FOR 2: " + ds.child("csmd").child("position").getValue()); }
-                        //String[] index = ds.child("csmd").child("position").getValue().toString();
+                    // Eksempel på sortereing på f.eks. sarpsborg
+                    //if (ds.child("csmd").child("Municipality").getValue().equals("SARPSBORG")) {
                         String[] index = ds.child("csmd").child("Position").getValue().toString().replaceAll("\\(", "").replaceAll("\\)", "").split(",");
 
                         Double latitude = Double.parseDouble(index[0]);
                         Double longitude = Double.parseDouble(index[1]);
 
                         LatLng markerJson = new LatLng(latitude, longitude);
-                        mMap.addMarker(new MarkerOptions().position(markerJson)
+                        marker = mMap.addMarker(new MarkerOptions()
+                                .position(markerJson)
                                 .title(ds.child("csmd").child("name").getValue().toString()));
-                    }
+                        marker.setTag(ds);
+                    //}
+
+                    //http://nobil.no/img/ladestasjonbilder/55.jpg
+                    //imageURL = ds.child("csmd").child("Image").getValue().toString();
+
+                    // Infowindow
+                    mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                        @Override
+                        public void onInfoWindowClick(Marker marker) {
+                            Intent intent = new Intent(MapsActivity.this, Ladestasjon.class);
+                            // Sender inn ladestasjonens navn for å hente riktig informasjon i Ladestasjon activity
+                            intent.putExtra("name", marker.getTitle());
+                            startActivity(intent);
+                        }
+                    });
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Getting Post failed, log a message
-                Log.w("firebase", "loadPost:onCancelled", databaseError.toException());
+                Log.w("firebasefail", "loadPost:onCancelled", databaseError.toException());
                 // ...
             }
-        };
+        });
         mDatabase.addValueEventListener(chargeListener);
+        mDatabase.keepSynced(true);
     }
 
-    // Test klasse, bare for å printe ut ting i logcat
-    public void writeJSON() {
 
+    // Sjekker om det er tilkobling mot firebase
+    public void hasConnection() {
+        mDatabase  = FirebaseDatabase.getInstance().getReference(".info/connected");
+        mDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                if (connected) {
+                    Log.d("connectionfirebase", "Connected");
+                    Toast.makeText(MapsActivity.this, "Connected", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.d("connectionfirebase", "Disconnected");
+                    Toast.makeText(MapsActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.err.println("Listener was cancelled");
+            }
+        });
     }
 
+
+    // Med asset
     public void createMarkersFromJson() {
         try {
             JSONObject object = null;
             object = new JSONObject(loadJSONFromAsset());
             JSONArray jsonObj = object.getJSONArray("chargerstations");
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
 
                 for (int i = 0; i < jsonObj.length(); i++) {
@@ -335,6 +299,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    // Lese inn JSON fra datadump JSON filen i assets
     public String loadJSONFromAsset() {
         String json = null;
         try {
