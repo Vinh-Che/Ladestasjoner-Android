@@ -1,4 +1,4 @@
-package no.hiof.che.q.vinh.androidmapstest;
+package no.hiof.che.q.vinh.ElMap;
 
 import org.junit.Test;
 

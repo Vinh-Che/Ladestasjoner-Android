@@ -1,16 +1,12 @@
-package no.hiof.che.q.vinh.androidmapstest;
+package no.hiof.che.q.vinh.ElMap;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,8 +27,8 @@ public class Ladestasjon extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ladestasjon);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        setContentView(no.hiof.che.q.vinh.ElMap.R.layout.activity_ladestasjon);
+        Toolbar toolbar = findViewById(no.hiof.che.q.vinh.ElMap.R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getData();
@@ -57,9 +53,9 @@ public class Ladestasjon extends AppCompatActivity {
                     if ( name.equals(lsName)) {
                         String imageURL = ds.child("csmd").child("Image").getValue().toString();
 
-                        TextView txtNede = findViewById(R.id.tView1);
-                        TextView txtOppe = findViewById(R.id.tView2);
-                        ImageView iView = findViewById(R.id.imageView);
+                        TextView txtNede = findViewById(no.hiof.che.q.vinh.ElMap.R.id.tView1);
+                        TextView txtOppe = findViewById(no.hiof.che.q.vinh.ElMap.R.id.tView2);
+                        ImageView iView = findViewById(no.hiof.che.q.vinh.ElMap.R.id.imageView);
 
                         String lsCity = ds.child("csmd").child("City").getValue().toString();
 

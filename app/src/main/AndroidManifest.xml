@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="no.hiof.che.q.vinh.androidmapstest">
+    package="no.hiof.che.q.vinh.ElMap">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -62,7 +62,7 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="no.hiof.che.q.vinh.androidmapstest.MapsActivity" />
+                android:value=".MapsActivity" />
         </activity>
     </application>
 

@@ -1,4 +1,4 @@
-package no.hiof.che.q.vinh.androidmapstest;
+package no.hiof.che.q.vinh.ElMap;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -56,9 +56,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
+        inflater.inflate(no.hiof.che.q.vinh.ElMap.R.menu.options_menu, menu);
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(no.hiof.che.q.vinh.ElMap.R.id.search).getActionView();
         searchView.setMaxWidth(Integer.MAX_VALUE);
         return true;
     }
@@ -67,9 +67,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(no.hiof.che.q.vinh.ElMap.R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(no.hiof.che.q.vinh.ElMap.R.id.map);
         mapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
 
@@ -82,7 +82,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         */
 
         // Toolbar
-        Toolbar myToolbar = findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(no.hiof.che.q.vinh.ElMap.R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
     }
@@ -208,6 +208,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .position(markerJson)
                                 .title(ds.child("csmd").child("name").getValue().toString()));
                         marker.setTag(ds);
+
+
                     //}
 
                     //http://nobil.no/img/ladestasjonbilder/55.jpg

@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "no.hiof.che.q.vinh.androidmapstest"
+        applicationId "no.hiof.che.q.vinh.ElMap"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1

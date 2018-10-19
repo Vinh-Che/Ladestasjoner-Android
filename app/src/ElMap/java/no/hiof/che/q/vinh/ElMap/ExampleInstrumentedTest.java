@@ -1,4 +1,4 @@
-package no.hiof.che.q.vinh.androidmapstest;
+package no.hiof.che.q.vinh.ElMap;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
