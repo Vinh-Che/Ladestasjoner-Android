@@ -1,0 +1,115 @@
+{
+  "project_info": {
+    "project_number": "601572043593",
+    "firebase_url": "https://elbil-1537205288625.firebaseio.com",
+    "project_id": "elbil-1537205288625",
+    "storage_bucket": "elbil-1537205288625.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:601572043593:android:9c4b8da1ad1b7a4f",
+        "android_client_info": {
+          "package_name": "no.hiof.che.q.vinh.ElMap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "601572043593-kpee2bt6ihee31qiik9knctcvfttda1g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "no.hiof.che.q.vinh.ElMap",
+            "certificate_hash": "616e7f0ff4969a4300a4eb45270fc8551cf57205"
+          }
+        },
+        {
+          "client_id": "601572043593-q91chd4iq9dle0saan0ovs1ij39f8t30.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "no.hiof.che.q.vinh.ElMap",
+            "certificate_hash": "717572ba035318e0d55a37904607868e7142f04e"
+          }
+        },
+        {
+          "client_id": "601572043593-bu91s2le8bjlulai5f54atr25bv4n240.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU0tnNej6ssh1cMcF0nyhdpTluGjNMNEE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "601572043593-bu91s2le8bjlulai5f54atr25bv4n240.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:601572043593:android:3c1b5230e3dd343c",
+        "android_client_info": {
+          "package_name": "no.hiof.che.q.vinh.androidmapstest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "601572043593-qrhdvsi75n8kh9b62o6uafvjeeiina9l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "no.hiof.che.q.vinh.androidmapstest",
+            "certificate_hash": "616e7f0ff4969a4300a4eb45270fc8551cf57205"
+          }
+        },
+        {
+          "client_id": "601572043593-oa4t5qmk6hnt6q5h95pcv1ol086194p6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "no.hiof.che.q.vinh.androidmapstest",
+            "certificate_hash": "717572ba035318e0d55a37904607868e7142f04e"
+          }
+        },
+        {
+          "client_id": "601572043593-bu91s2le8bjlulai5f54atr25bv4n240.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU0tnNej6ssh1cMcF0nyhdpTluGjNMNEE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "601572043593-bu91s2le8bjlulai5f54atr25bv4n240.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

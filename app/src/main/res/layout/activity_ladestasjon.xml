@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    tools:context=".Ladestasjon">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".Ladestasjon">
+        <!--
+        <ProgressBar
+            android:id="@+id/progressbar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="573dp"
+            app:layout_constraintBottom_toBottomOf="@+id/map"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" /> -->
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme" />
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/colorPrimary">
+
+            <TextView
+                android:id="@+id/tView1"
+                android:layout_width="423dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+
+                android:text="Ladestasjon navn"
+                android:textAlignment="viewStart"
+                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                android:textSize="26sp" />
+        </android.support.v7.widget.CardView>
+
+        <!--
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="6dp"/>
+
+            -->
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/my_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            fresco:placeholderImage="@drawable/ic_refresh"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tView2"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="start"
+
+                android:layout_marginStart="8dp"
+                android:gravity="start"
+                android:text="@string/Antall_ladestasjoner" />
+
+            <TextView
+                android:id="@+id/tView8"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+                android:gravity="end"
+                android:text="#"
+                android:textAlignment="viewEnd" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tView9"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="8dp"
+
+
+                android:gravity="start"
+
+                android:text="Sted" />
+
+            <TextView
+                android:id="@+id/tView10"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+
+                android:gravity="end"
+
+                android:text="#"
+                android:textAlignment="viewEnd" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tView11"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="8dp"
+
+
+                android:gravity="start"
+
+                android:text="@string/parkeringsavgift" />
+
+            <TextView
+                android:id="@+id/tView12"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+
+                android:gravity="end"
+
+                android:text="#"
+                android:textAlignment="viewEnd" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tView13"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="8dp"
+
+
+                android:gravity="start"
+
+                android:text="Tilgjengelig" />
+
+            <TextView
+                android:id="@+id/tView14"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+
+                android:gravity="end"
+
+                android:text="#"
+                android:textAlignment="viewEnd" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tView15"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="8dp"
+
+
+                android:gravity="start"
+
+                android:text="Døgnåpen" />
+
+            <TextView
+                android:id="@+id/tView16"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+
+                android:gravity="end"
+
+                android:text="#"
+                android:textAlignment="viewEnd" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tView17"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="8dp"
+
+
+                android:gravity="start"
+
+                android:text="Tidsbegrensning" />
+
+            <TextView
+                android:id="@+id/tView18"
+                android:layout_width="match_parent"
+                android:layout_height="26dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+
+                android:gravity="end"
+
+                android:text="#"
+                android:textAlignment="viewEnd" />
+        </LinearLayout>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cvKontakt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/colorPrimary">
+
+            <TextView
+                android:id="@+id/tView4"
+                android:layout_width="423dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+
+                android:text="Kontaktinformasjon"
+                android:textAlignment="viewStart"
+                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                android:textSize="26sp" />
+        </android.support.v7.widget.CardView>
+
+        <TextView
+            android:id="@+id/tView5"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="tv Kontakt" />
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cvKommentar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/colorPrimary">
+
+            <TextView
+                android:id="@+id/tView6"
+                android:layout_width="423dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="Kommentar"
+                android:textAlignment="viewStart"
+                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                android:textSize="26sp" />
+        </android.support.v7.widget.CardView>
+
+        <TextView
+            android:id="@+id/tView"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Tv kommentar" />
+
+    </LinearLayout>
+</ScrollView>
