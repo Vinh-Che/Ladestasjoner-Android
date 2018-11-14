@@ -1,4 +1,4 @@
-package no.hiof.che.q.vinh.ElMap;
+package no.hiof.che.q.vinh.ElMap.model;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;

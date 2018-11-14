@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -14,17 +13,14 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
@@ -33,35 +29,21 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
+
+import no.hiof.che.q.vinh.ElMap.model.markerItem;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -120,8 +102,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             firebaseDatabase = FirebaseDatabase.getInstance();
             firebaseDatabase.setPersistenceEnabled(true);
         }
-        FirebaseData fb = new FirebaseData();
-        fb.execute(list);
+        //FirebaseData fb = new FirebaseData();
+        //fb.execute(list);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDialog();
+
+            }
+        });
 
 
     }
@@ -213,6 +204,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(mClusterManager.getMarkerManager());
         mMap.setOnMarkerClickListener(mClusterManager.getMarkerManager());
 
+        FirebaseData fb = new FirebaseData();
+        fb.execute(list);
+
 
         // Laster inn data fra database
 
@@ -241,6 +235,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             //findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
             //findViewById(R.id.map).setVisibility(View.INVISIBLE);
             super.onPreExecute();
+            Toast.makeText(MapsActivity.this, "Laster ...", Toast.LENGTH_LONG).show();
 
         }
 
@@ -304,6 +299,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 // Sender inn ladestasjonens navn for å hente riktig informasjon i Ladestasjon activity
                                 intent.putExtra("name", marker.getTitle());
                                 startActivity(intent);
+
                             }
                         });
 
@@ -367,5 +363,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         distance = distance / 1000;
         String distanceInKm = String.format("%.2f", distance);
         return distanceInKm;
+    }
+
+    void showDialog() {
+        // Create the fragment and show it as a dialog.
+        DialogFragment newFragment = FavoriteFragment.newInstance();
+        newFragment.show(getSupportFragmentManager(), "dialog");
     }
 }
