@@ -15,8 +15,12 @@ import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -43,6 +47,7 @@ import com.google.maps.android.clustering.ClusterManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.hiof.che.q.vinh.ElMap.adapter.RecyclerViewAdapter;
 import no.hiof.che.q.vinh.ElMap.model.markerItem;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -60,6 +65,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     List<Marker> list = new ArrayList<>();
     List<LatLng> latList = new ArrayList<>();
     ProgressBar pbar;
+    private ArrayList<String> mCityNames = new ArrayList();
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+
 
 
     @Override
@@ -77,11 +89,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onPlaceSelected(Place place) {
                 // TODO: Get info about the selected place.
-                //mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
-                Log.i("placeslog", "Place: " + place.getName());
-                Log.i("placeslog", "Rating: " + place.getRating());
-                Log.i("placeslog", "Website: " + place.getWebsiteUri());
+                //Log.i("placeslog", "Place: " + place.getName());
+                //Log.i("placeslog", "Rating: " + place.getRating());
+                //Log.i("placeslog", "Website: " + place.getWebsiteUri());
 
             }
 
@@ -102,19 +113,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             firebaseDatabase = FirebaseDatabase.getInstance();
             firebaseDatabase.setPersistenceEnabled(true);
         }
-        //FirebaseData fb = new FirebaseData();
-        //fb.execute(list);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+            // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        if (mMap == null) {
+            mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+            FirebaseData fb = new FirebaseData();
+            fb.execute(list);
+        }
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FloatingActionButton floatingAb = findViewById(R.id.fab);
+        floatingAb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showDialog();
-
             }
         });
-
-
     }
 
     public void getPermission(GoogleMap map) {
@@ -204,9 +225,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(mClusterManager.getMarkerManager());
         mMap.setOnMarkerClickListener(mClusterManager.getMarkerManager());
 
-        FirebaseData fb = new FirebaseData();
-        fb.execute(list);
-
 
         // Laster inn data fra database
 
@@ -241,33 +259,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         protected List<Marker> doInBackground(List<Marker>... lists) {
-            mDatabase = FirebaseDatabase.getInstance().getReference().child("chargerstations");
-            ValueEventListener chargeListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                        // Eksempel på sortereing på f.eks. sarpsborg
-                        if (ds.child("csmd").child("Land_code").getValue().equals("NOR")) {
-                            //findViewById(R.id.progressbar).setVisibility(View.GONE);
-                            //findViewById(R.id.map).setVisibility(View.VISIBLE);
+            if (list.size() == 0) {
+                mDatabase = FirebaseDatabase.getInstance().getReference().child("chargerstations");
+                ValueEventListener chargeListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                            // Eksempel på sortereing på f.eks. sarpsborg
+                            if (ds.child("csmd").child("Land_code").getValue().equals("NOR")) {
+                                //findViewById(R.id.progressbar).setVisibility(View.GONE);
+                                //findViewById(R.id.map).setVisibility(View.VISIBLE);
 
-                            String[] index = ds.child("csmd").child("Position").getValue().toString().replaceAll("\\(", "").replaceAll("\\)", "").split(",");
+                                String[] index = ds.child("csmd").child("Position").getValue().toString().replaceAll("\\(", "").replaceAll("\\)", "").split(",");
 
-                            Double latitude = Double.parseDouble(index[0]);
-                            Double longitude = Double.parseDouble(index[1]);
+                                Double latitude = Double.parseDouble(index[0]);
+                                Double longitude = Double.parseDouble(index[1]);
 
-                            LatLng markerJson = new LatLng(latitude, longitude);
-                            marker = mMap.addMarker(new MarkerOptions()
-                                    .position(markerJson)
-                                    .title(ds.child("csmd").child("name").getValue().toString())
-                                    .visible(false));
+                                LatLng markerJson = new LatLng(latitude, longitude);
+                                marker = mMap.addMarker(new MarkerOptions()
+                                        .position(markerJson)
+                                        .title(ds.child("csmd").child("name").getValue().toString())
+                                        .visible(false));
+                                list.add(marker);
 
-                            latList.add(marker.getPosition());
+                                //mClusterManager.addItem(new markerItem(latitude, longitude, marker.getTitle(), ds.child("csmd").child("Description_of_location").getValue().toString()));
+                                mClusterManager.addItem(new markerItem(latitude, longitude, marker.getTitle()));
+                            }
 
-                            //mClusterManager.addItem(new markerItem(latitude, longitude, marker.getTitle(), ds.child("csmd").child("Description_of_location").getValue().toString()));
-                            mClusterManager.addItem(new markerItem(latitude, longitude, marker.getTitle()));
+
                         }
-
+                        mMap.clear();
                         // Cluster
                         mClusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<markerItem>() {
                             @Override
@@ -278,6 +299,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
                         });
 
+
+
                         mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<markerItem>() {
                             @Override
                             public boolean onClusterItemClick(markerItem markerItem) {
@@ -285,7 +308,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                 String Distance = "Avstand: " + getDistanceInMeter(currentPosition(), markerItem.getPosition()) + "KM";
                                 Toast.makeText(MapsActivity.this, Distance, Toast.LENGTH_SHORT).show();
-
+                                //Log.d("duma", "onClusterItemClick: " + list.size());
                                 return false;
                             }
                         });
@@ -302,27 +325,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             }
                         });
-
+                        mClusterManager.cluster();
+                        //mMap.setClustering(new ClusteringSettings().enabled(false).addMarkersDynamically(true));
 
                     }
-                    mMap.clear();
-                    mClusterManager.cluster();
-
-                }
 
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    // Getting Post failed, log a message
-                    Log.w("firebasefail", "loadPost:onCancelled", databaseError.toException());
-                    // ...
-                }
-            };
-            mDatabase.addValueEventListener(chargeListener);
-            mDatabase.keepSynced(true);
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // Getting Post failed, log a message
+                        Log.w("firebasefail", "loadPost:onCancelled", databaseError.toException());
+                        // ...
+                    }
+                };
+                mDatabase.addValueEventListener(chargeListener);
+                mDatabase.keepSynced(true);
+
+            }
             return list;
         }
-
     }
 
 
@@ -368,6 +389,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     void showDialog() {
         // Create the fragment and show it as a dialog.
         DialogFragment newFragment = FavoriteFragment.newInstance();
-        newFragment.show(getSupportFragmentManager(), "dialog");
+      newFragment.show(getSupportFragmentManager(), "dialog");
+
+
+
     }
 }
