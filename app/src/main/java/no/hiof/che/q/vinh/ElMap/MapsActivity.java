@@ -24,6 +24,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
@@ -36,6 +39,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,6 +50,7 @@ import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import no.hiof.che.q.vinh.ElMap.adapter.RecyclerViewAdapter;
@@ -55,17 +61,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Vars
     private static final int MY_PERMISSIONS_REQUEST_CURRENT_LOCATION = 100;
     private static final int MY_AUTO_PLACE = 101;
+    private static final int RC_SIGN_IN = 102;
+
+
     private static final Object Json = null ;
     private GoogleMap mMap;
     private View mapView;
     private DatabaseReference mDatabase;
     private static FirebaseDatabase firebaseDatabase;
+    private FirebaseAuth mAuth;
     private Marker marker;
     private ClusterManager<markerItem> mClusterManager;
     List<Marker> list = new ArrayList<>();
     List<LatLng> latList = new ArrayList<>();
+    List<String> fav = new ArrayList<>();
     ProgressBar pbar;
-    private ArrayList<String> mCityNames = new ArrayList();
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -111,7 +121,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (firebaseDatabase == null) {
             firebaseDatabase = FirebaseDatabase.getInstance();
+            mAuth = FirebaseAuth.getInstance();
+            createSignInIntent();
             firebaseDatabase.setPersistenceEnabled(true);
+
         }
 
             // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -124,16 +137,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
         FloatingActionButton floatingAb = findViewById(R.id.fab);
         floatingAb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //showDialog();
                 startFav();
             }
         });
@@ -142,6 +156,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //Starter favoriteActivity
     private void startFav() {
         Intent intent = new Intent(this, FavoriteActivity.class);
+        //intent.putExtra("mylist", list.);
+
         startActivity(intent);
     }
 
@@ -287,7 +303,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         .position(markerJson)
                                         .title(ds.child("csmd").child("name").getValue().toString())
                                         .visible(false));
-                                list.add(marker);
+                                //list.add(marker);
 
                                 //mClusterManager.addItem(new markerItem(latitude, longitude, marker.getTitle(), ds.child("csmd").child("Description_of_location").getValue().toString()));
                                 mClusterManager.addItem(new markerItem(latitude, longitude, marker.getTitle()));
@@ -306,6 +322,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
                         });
 
+                        mMap.setOnInfoWindowLongClickListener(new GoogleMap.OnInfoWindowLongClickListener() {
+                            @Override
+                            public void onInfoWindowLongClick(Marker marker) {
+                                fav.add(marker.getTitle());
+
+
+                                Toast.makeText(MapsActivity.this, marker.getTitle(), Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+
+
 
 
                         mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<markerItem>() {
@@ -315,7 +343,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                 String Distance = "Avstand: " + getDistanceInMeter(currentPosition(), markerItem.getPosition()) + "KM";
                                 Toast.makeText(MapsActivity.this, Distance, Toast.LENGTH_SHORT).show();
-                                //Log.d("duma", "onClusterItemClick: " + list.size());
                                 return false;
                             }
                         });
@@ -393,12 +420,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return distanceInKm;
     }
 
-    void showDialog() {
-        // Create the fragment and show it as a dialog.
-        DialogFragment newFragment = FavoriteFragment.newInstance();
-      newFragment.show(getSupportFragmentManager(), "dialog");
+    public void createSignInIntent() {
+        // [START auth_fui_create_intent]
+        // Choose authentication providers
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build());
 
-
-
+        // Create and launch sign-in intent
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .build(),
+                RC_SIGN_IN);
+        // [END auth_fui_create_intent]
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
+            if (resultCode == RESULT_OK) {
+                // Successfully signed in
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                // ...
+            } else {
+                // Sign in failed. If response is null the user canceled the
+                // sign-in flow using the back button. Otherwise check
+                // response.getError().getErrorCode() and handle the error.
+                // ...
+            }
+        }
+    }
+
+
 }
