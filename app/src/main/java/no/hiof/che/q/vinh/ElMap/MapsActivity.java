@@ -133,9 +133,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         floatingAb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDialog();
+                //showDialog();
+                startFav();
             }
         });
+    }
+
+    //Starter favoriteActivity
+    private void startFav() {
+        Intent intent = new Intent(this, FavoriteActivity.class);
+        startActivity(intent);
     }
 
     public void getPermission(GoogleMap map) {
